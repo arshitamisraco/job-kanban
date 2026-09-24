@@ -1,9 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import type { Application, Status } from "@/lib/types";
 import { deleteApplication, patchApplication, ApiError } from "./api";
 import { formatRelative } from "./time";
+import {
+  Button,
+  Field,
+  Input,
+  Select,
+  Sheet,
+  StatusPill,
+  Textarea,
+  STATUS_LABEL,
+  fadeUp,
+  listStagger,
+  spring,
+} from "@/components/ui";
 
 const STATUS_OPTIONS: Status[] = [
   "applied",
@@ -31,14 +45,6 @@ export default function DetailPanel({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   async function save(patch: Partial<{
     company: string;
@@ -92,119 +98,126 @@ export default function DetailPanel({
   });
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end">
-      <div
-        className="absolute inset-0 bg-black/60"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <div className="relative z-10 flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-neutral-800 bg-neutral-900 shadow-xl">
-        <div className="flex items-center justify-between border-b border-neutral-800 px-5 py-4">
-          <h2 className="text-sm font-semibold text-neutral-200">
-            Application details
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="rounded p-1 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100"
+    <Sheet open onClose={onClose} title="Application details">
+      <div className="flex flex-1 flex-col gap-5 px-5 py-5">
+        <Field label="Company">
+          <Input value={company} onChange={(e) => setCompany(e.target.value)} />
+        </Field>
+
+        <Field label="Role">
+          <Input value={role} onChange={(e) => setRole(e.target.value)} />
+        </Field>
+
+        <Field label="Status">
+          <Select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as Status)}
           >
-            ✕
-          </button>
+            {STATUS_OPTIONS.map((s) => (
+              <option key={s} value={s}>
+                {STATUS_LABEL[s]}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <div className="-mt-3">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={status}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={spring}
+              className="inline-flex"
+            >
+              <StatusPill status={status} />
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        <div className="flex flex-1 flex-col gap-4 px-5 py-4">
-          <label className="flex flex-col gap-1 text-xs text-neutral-400">
-            Company
-            <input
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              className="rounded-md border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 focus:border-neutral-500 focus:outline-none"
-            />
-          </label>
+        <Field label="Notes">
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={4}
+            className="resize-none"
+          />
+        </Field>
 
-          <label className="flex flex-col gap-1 text-xs text-neutral-400">
-            Role
-            <input
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="rounded-md border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 focus:border-neutral-500 focus:outline-none"
-            />
-          </label>
+        {error && <p className="text-xs text-status-red-fg">{error}</p>}
 
-          <label className="flex flex-col gap-1 text-xs text-neutral-400">
-            Status
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as Status)}
-              className="rounded-md border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 focus:border-neutral-500 focus:outline-none"
+        <div className="flex items-center gap-3">
+          <Button variant="primary" loading={saving} onClick={handleSave} disabled={saving}>
+            {saving ? "Saving…" : "Save"}
+          </Button>
+          <AnimatePresence>
+            {saved && (
+              <motion.span
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                className="text-xs text-status-green-fg"
+              >
+                Saved
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="flex flex-col gap-2 border-t border-line pt-5">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="justify-start"
+            onClick={handleMarkIgnored}
+            disabled={saving}
+          >
+            Mark not job-related
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            className="justify-start"
+            onClick={handleDelete}
+            disabled={saving}
+          >
+            Delete
+          </Button>
+        </div>
+
+        <div className="border-t border-line pt-5">
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-3">
+            Emails ({sortedEmails.length})
+          </h3>
+          {sortedEmails.length === 0 ? (
+            <p className="text-xs text-ink-3">No emails linked.</p>
+          ) : (
+            <motion.ul
+              variants={listStagger}
+              initial="hidden"
+              animate="show"
+              className="flex flex-col gap-3"
             >
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-1 text-xs text-neutral-400">
-            Notes
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={4}
-              className="resize-none rounded-md border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 focus:border-neutral-500 focus:outline-none"
-            />
-          </label>
-
-          {error && <p className="text-xs text-red-400">{error}</p>}
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="rounded-md bg-neutral-100 px-3 py-1.5 text-sm font-medium text-neutral-900 transition hover:bg-white disabled:opacity-50"
-            >
-              {saving ? "Saving…" : "Save"}
-            </button>
-            {saved && <span className="text-xs text-emerald-400">Saved</span>}
-          </div>
-
-          <div className="flex flex-col gap-2 border-t border-neutral-800 pt-4">
-            <button
-              onClick={handleMarkIgnored}
-              disabled={saving}
-              className="rounded-md border border-neutral-700 px-3 py-1.5 text-left text-sm text-neutral-300 transition hover:bg-neutral-800 disabled:opacity-50"
-            >
-              Mark not job-related
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={saving}
-              className="rounded-md border border-red-900 px-3 py-1.5 text-left text-sm text-red-400 transition hover:bg-red-950 disabled:opacity-50"
-            >
-              Delete
-            </button>
-          </div>
-
-          <div className="border-t border-neutral-800 pt-4">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-              Emails ({sortedEmails.length})
-            </h3>
-            <ul className="flex flex-col gap-3">
               {sortedEmails.map((email) => (
-                <li
+                <motion.li
                   key={email.gmail_id}
-                  className="rounded-md border border-neutral-800 bg-neutral-950 p-3 text-sm"
+                  variants={fadeUp}
+                  className="glass glass-soft rounded-md p-3"
                 >
-                  <p className="font-medium text-neutral-200">
+                  <p className="text-sm font-medium text-ink">
                     {email.subject || "(no subject)"}
                   </p>
-                  <p className="mt-0.5 text-xs text-neutral-500">
-                    {email.from_addr || "unknown sender"} ·{" "}
-                    {formatRelative(email.received_at)}
+                  <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-ink-3">
+                    <span>
+                      {email.from_addr || "unknown sender"} ·{" "}
+                      {formatRelative(email.received_at)}
+                    </span>
+                    {email.detected_status && (
+                      <StatusPill status={email.detected_status} size="xs" />
+                    )}
                   </p>
                   {email.snippet && (
-                    <p className="mt-1.5 text-xs text-neutral-400">
+                    <p className="mt-1.5 text-xs leading-relaxed text-ink-2">
                       {email.snippet}
                     </p>
                   )}
@@ -213,20 +226,17 @@ export default function DetailPanel({
                       href={email.gmail_link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-1.5 inline-block text-xs text-sky-400 hover:underline"
+                      className="mt-1.5 inline-block text-xs font-medium text-ink underline-offset-2 hover:underline"
                     >
                       Open in Gmail →
                     </a>
                   )}
-                </li>
+                </motion.li>
               ))}
-              {sortedEmails.length === 0 && (
-                <p className="text-xs text-neutral-500">No emails linked.</p>
-              )}
-            </ul>
-          </div>
+            </motion.ul>
+          )}
         </div>
       </div>
-    </div>
+    </Sheet>
   );
 }

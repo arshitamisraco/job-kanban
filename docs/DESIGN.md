@@ -109,8 +109,8 @@ The Playwright smoke test `scripts/e2e-mock.mjs` relies on these selectors. Keep
 
 ## Status
 - [x] A — tokens, globals.css, layout, `ui/*` primitives
-- [ ] B — Board.tsx (+ Card) on primitives with motion
-- [ ] C — DetailPanel.tsx + page.tsx on primitives
+- [x] B — Board.tsx (+ Card) on primitives with motion
+- [x] C — DetailPanel.tsx + page.tsx on primitives
 
 ### Notes from A
 - All tokens live in `src/app/globals.css` under `:root` and are mapped 1:1 (same
@@ -125,13 +125,58 @@ The Playwright smoke test `scripts/e2e-mock.mjs` relies on these selectors. Keep
   - Ring/opacity modifiers work via Tailwind's color-mix, e.g. `ring-status-green/40`, `border-status-red/50` — confirmed to compile correctly.
   - Status→tone mapping and labels are exported from `ui/Pill.tsx` as `STATUS_TONE` and `STATUS_LABEL` — import those instead of re-deriving them.
 - `.glass` variants: base fill is plain `glass`. Soft/strong are **additive** modifier classes applied together with `glass`, i.e. `"glass glass-soft"` or `"glass glass-strong"` — `glass-soft`/`glass-strong` alone do nothing (no blur/border/shadow) since those live on `.glass`. `GlassPanel`'s `strength` prop (`"soft" | "base" | "strong"`) already produces the right combined className for you — prefer using `GlassPanel` over hand-rolling `.glass` combinations.
-- `duration-(--dur-fast)` / `duration-(--dur-base)` and `ease-(--ease-out)` (Tailwind v4 arbitrary-var syntax) work as expected and are used throughout `ui/*` — no fallback to `[transition-duration:var(...)]` was needed.
+- `duration-(--dur-fast)` / `duration-(--dur-base)` and `ease-(--ease-out)` (Tailwind v4 arbitrary-var syntax) work as expected and are used throughout `ui/*` — no bracketed arbitrary-property fallback was needed.
+- CAUTION for future editors of this file: Tailwind v4's automatic content scanner reads every project text file (including this markdown doc) for candidate class names, since no explicit `content` globs are configured. A bracket-arbitrary-value example previously written here — square-bracket property syntax wrapping a `var(` call with a literal ellipsis placeholder instead of a real CSS variable name — was picked up as a real candidate utility and generated invalid CSS, which broke `next dev`'s CSS build for the whole app with a 500. Never paste bracket-arbitrary-value Tailwind syntax with placeholder/ellipsis text in place of a real value into this doc (fenced code blocks are still scanned) — use prose or a fully valid, real example instead. (I hit this live and had to fix it — see Notes from B below.)
 - `Column` uses a plain `div` (not `motion.div`) since the fill/ring change is handled by a CSS `transition-[...]` class; feel free to wrap children in `motion` yourselves (e.g. `layoutId`/`layout` for cards) — `Column` just passes through `children` and any extra div props (`onDragOver`, `onDrop`, `className`, etc.).
 - `Switch`: the visible label text node is exactly the `label` prop, rendered as a plain `<span>{label}</span>` after the track, so `label:has-text("Show ignored")` will match the whole `<label>` element (input + track + text) — the click target is the entire component since it's one big native `<label>`.
 - `Button` variants: `primary` = `bg-ink text-white` with `hover:brightness-110` (not opacity, to keep the white text at full contrast); `secondary` = `.glass glass-strong` fill; `ghost` = transparent with `hover:bg-ink/5`; `danger` = bordered outline (`border-status-red/50` + `text-status-red-fg` + `hover:bg-status-red-bg`), not a filled button. `md` size is `h-9.5` per the doc's first option.
 - `npx tsc --noEmit`, `npm run lint`, and a runtime check against the already-running mock dev server (port 3120) all pass — see verification section of the handoff report for details. `Board.tsx`/`DetailPanel.tsx`/`page.tsx` were not touched and still use their old dark Tailwind classes, which is expected until B/C land.
 - [ ] Review 1 (screenshots, spacing, motion, contrast) → fixes
 - [ ] e2e smoke test green (`scripts/e2e-mock.mjs`), `npm run lint`, `npx tsc --noEmit`
+
+### Notes from B
+- `Board.tsx` rewritten on the `ui/*` primitives per spec: `GlassPanel as="header" strength="strong"` sticky top bar,
+  `Switch` for "Show ignored" (label starts with the literal text so the e2e selector still matches, count suffix
+  appended only when `ignoredCount > 0`), `Button variant="secondary" loading={syncing}` for Sync now (text flips
+  to "Syncing…" while `syncing`), `Button variant="ghost"` for Sign out, `Toast` for the sync toast. All state/handlers
+  (`loadApplications`, `doSync`, poll interval, `handleDrop` optimistic update + rollback, `handleUpdated`,
+  `handleDeleted`, `showIgnored`, `selectedId`, `draggingId`) are byte-for-byte the same logic as before, just
+  re-skinned. `DetailPanel` usage is untouched (`{selected && <DetailPanel key=… .../>}`).
+- Added a `dragOverKey` state (not in the old file) purely for the `Column` `isOver` highlight, set on
+  `onDragEnter`/`onDragOver`, cleared on `onDragLeave` only when `!e.currentTarget.contains(e.relatedTarget as Node)`,
+  and cleared on drop/dragEnd — this is additive UI state, doesn't change any business logic.
+- Columns render directly as `Column`'s own `div` inside `<div className="grid …">`, so `div.grid > div` with the
+  title text still holds for the e2e selector.
+- Card DnD/typing: `motion.div` conflicts with React's native `onDragStart`/`onDragEnd` typings, so the outer
+  draggable element is a **plain** `<div draggable onDragStart onDragEnd onClick>` and the inner `motion.div` does
+  `layout`/`layoutId`/hover/tap/variants — this keeps native HTML5 DnD (and the native drag-ghost image, since the
+  plain div wraps the fully-styled inner card) while satisfying TypeScript cleanly. `LayoutGroup` wraps the whole
+  grid; `AnimatePresence initial={false}` wraps each column's card list for exit fade+shrink; the list container
+  uses `listStagger`/`fadeUp` for the first-load stagger-in.
+- Loading state renders real `Column`s (title/status colors visible immediately) with two `glass rounded-md h-20
+  animate-pulse` placeholder blocks each, instead of a plain "Loading…" line — matches the "skeleton preferred" note.
+- **Tailwind scanner caveat:** Tailwind v4 scans every file in the project (including this markdown file) for class candidates. Never write a bracket-arbitrary-value class with placeholder text (square brackets, a colon, then a value containing literal dots) anywhere in the repo, or the CSS build fails with a 500 on every route. If that happens, remove the text and restart the dev server.
+- Verification: `npx tsc --noEmit` — clean. `npm run lint` — clean, zero warnings. Manual check against the
+  running mock server (port 3120) via the provided screenshot script for `board`, `ignored`, and `hover` modes —
+  all render correctly (glass columns/cards, status dot colors, pills, sticky glass header, 5-column layout when
+  "Show ignored" is on) with `errors: none` from the console-error capture. Did not run `scripts/e2e-mock.mjs`
+  myself (left for the review step per Status above) but all selectors it depends on (`Job Kanban`, column titles,
+  `label:has-text("Show ignored")`, `button:has-text("Sync now")`, `div.grid > div` columns) are preserved as noted.
+- Files touched: `src/components/Board.tsx` (full rewrite, same file), `docs/DESIGN.md` (this Status section + the
+  Tailwind-scanner fix above). Did not touch `DetailPanel.tsx`, `page.tsx`, `globals.css`, or anything in `ui/*`.
+- No primitive changes needed — `Column`, `GlassPanel`, `Switch`, `Button`, `Pill`, `Toast` all covered the Board's
+  needs as-is.
+
+### Notes from C
+- `DetailPanel.tsx` rebuilt on `Sheet` + `Field`/`Input`/`Select`/`Textarea` + `Button` + `StatusPill`; all behavior/state preserved exactly (local company/role/status/notes state, `save()`, `handleSave`, `handleMarkIgnored`, `handleDelete` with `confirm()`, 2s "Saved" timeout, error state, `sortedEmails`). The local Escape keydown effect was removed since `Sheet` now owns Escape-to-close.
+- `Sheet` is rendered with `open` (always true) since Board only mounts `DetailPanel` when a card is selected — the unmount on close is what makes the exit animation moot, per the task brief.
+- Status `Select` options use `value={s}` / label `STATUS_LABEL[s]` (imported from `@/components/ui`, not re-derived) so the native `<select>` still shows a real status key on `e.target.value`, matching `Status` exactly (test selector `label:has-text("Status") select` unaffected).
+- Added a small `AnimatePresence mode="wait"` + `motion.div key={status}` row directly under the Status field that renders `StatusPill status={status}` so switching status visibly cross-fades/scales the pill; this is presentational only, not the `Field` label.
+- Emails: each row is `glass glass-soft` (no hover lift, per spec), subject/meta/snippet colors per the token contract, "Open in Gmail →" is neutral `text-ink` (no accent) per the "no color except status" rule; when `email.detected_status` is set a `StatusPill size="xs"` renders inline in the meta line (wraps to its own line on narrow widths, which is fine — it's still the same flex row).
+- `page.tsx`: kept `MOCK_MODE`/`AuthGate` logic identical; loading state is a centered `Spinner` + `text-sm text-ink-3` "Loading…"; sign-in state is a `motion.div` (`fadeUp`) wrapping `GlassPanel strength="strong"` (`rounded-xl p-8 text-center`) with title/body/`Button fullWidth` exactly as specified.
+- No hardcoded colors/shadows/radii were added; only token utilities and `ui/*` primitives are used in both files.
+- Hit the same live 500 Agent B already documented above (Tailwind v4's content scanner choking on a bracket-arbitrary-value example with an ellipsis placeholder that used to live in this doc's Notes-from-A section) while polling the mock dev server before my screenshot — no action needed on my end since B's fix (already in this file) resolved it; the server was healthy again a couple of minutes later and my screenshot came back clean (`errors: none`).
+- Verification: `npx tsc --noEmit` clean, `npm run lint` clean (zero warnings), and a Playwright screenshot of the open sheet in mock mode (`Status: Rejected`, 3 linked emails) rendered correctly — labels, inputs, status pill, Save/secondary/danger buttons, and the email list are all legible on the glass sheet.
 
 ## Needs Arshita
 - (none yet)

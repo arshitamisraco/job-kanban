@@ -2,10 +2,22 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { signIn, signOut } from "next-auth/react";
+import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import type { Application, Status } from "@/lib/types";
 import { ApiError, getApplications, patchApplication, runSync } from "./api";
 import { formatRelative } from "./time";
 import DetailPanel from "./DetailPanel";
+import {
+  Button,
+  Column,
+  GlassPanel,
+  Pill,
+  Switch,
+  Toast,
+  fadeUp,
+  listStagger,
+  springSoft,
+} from "@/components/ui";
 
 const SYNC_INTERVAL_MS = 120_000;
 
@@ -42,6 +54,7 @@ export default function Board({ userEmail }: { userEmail: string }) {
   const [showIgnored, setShowIgnored] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [draggingId, setDraggingId] = useState<number | null>(null);
+  const [dragOverKey, setDragOverKey] = useState<Status | null>(null);
   const [, forceTick] = useState(0);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -142,20 +155,17 @@ export default function Board({ userEmail }: { userEmail: string }) {
   if (unauthorized) {
     return (
       <div className="flex flex-1 items-center justify-center px-4">
-        <div className="w-full max-w-sm rounded-xl border border-neutral-800 bg-neutral-900 p-8 text-center shadow-lg">
-          <h1 className="mb-2 text-xl font-semibold text-neutral-100">
+        <GlassPanel strength="strong" className="w-full max-w-sm rounded-xl p-8 text-center">
+          <h1 className="mb-2 text-lg font-semibold tracking-tight text-ink">
             Session expired
           </h1>
-          <p className="mb-6 text-sm text-neutral-400">
+          <p className="mb-6 text-sm text-ink-2">
             Please sign in again to continue.
           </p>
-          <button
-            onClick={() => signIn("google")}
-            className="w-full rounded-lg bg-neutral-100 px-4 py-2.5 text-sm font-medium text-neutral-900 transition hover:bg-white"
-          >
+          <Button fullWidth onClick={() => signIn("google")}>
             Sign in with Google
-          </button>
-        </div>
+          </Button>
+        </GlassPanel>
       </div>
     );
   }
@@ -167,115 +177,131 @@ export default function Board({ userEmail }: { userEmail: string }) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-800 px-6 py-4">
+      <GlassPanel
+        as="header"
+        strength="strong"
+        className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-3 rounded-none border-x-0 border-t-0 px-6 py-4"
+      >
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold text-neutral-100">Job Kanban</h1>
-          <span className="text-sm text-neutral-500">{userEmail}</span>
+          <h1 className="text-lg font-semibold tracking-tight text-ink">Job Kanban</h1>
+          <span className="text-sm text-ink-3">{userEmail}</span>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {syncToast && (
-            <span className="rounded-full bg-neutral-800 px-3 py-1 text-xs text-neutral-300">
-              {syncToast}
-            </span>
-          )}
-          <span className="text-xs text-neutral-500">
+          <Toast message={syncToast} />
+          <span className="text-xs text-ink-3 tabular-nums">
             Synced {formatRelative(lastSyncedAt)}
           </span>
-          <label className="flex items-center gap-1.5 text-xs text-neutral-400">
-            <input
-              type="checkbox"
-              checked={showIgnored}
-              onChange={(e) => setShowIgnored(e.target.checked)}
-              className="accent-neutral-400"
-            />
-            Show ignored{ignoredCount ? ` (${ignoredCount})` : ""}
-          </label>
-          <button
-            onClick={doSync}
-            disabled={syncing}
-            className="flex items-center gap-2 rounded-md border border-neutral-700 px-3 py-1.5 text-sm text-neutral-200 transition hover:bg-neutral-800 disabled:opacity-60"
-          >
-            {syncing && (
-              <span className="h-3 w-3 animate-spin rounded-full border-2 border-neutral-500 border-t-neutral-100" />
-            )}
+          <Switch
+            checked={showIgnored}
+            onChange={(e) => setShowIgnored(e.target.checked)}
+            label={`Show ignored${ignoredCount ? ` (${ignoredCount})` : ""}`}
+          />
+          <Button variant="secondary" size="sm" loading={syncing} onClick={doSync}>
             {syncing ? "Syncing…" : "Sync now"}
-          </button>
-          <button
-            onClick={() => signOut()}
-            className="rounded-md px-3 py-1.5 text-sm text-neutral-400 transition hover:bg-neutral-800 hover:text-neutral-100"
-          >
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => signOut()}>
             Sign out
-          </button>
+          </Button>
         </div>
-      </header>
+      </GlassPanel>
 
       <main className="flex-1 overflow-x-auto px-6 py-6">
         {loading ? (
-          <p className="text-sm text-neutral-500">Loading applications…</p>
-        ) : loadError ? (
-          <p className="text-sm text-red-400">{loadError}</p>
-        ) : all.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 py-24 text-center">
-            <p className="text-neutral-300">No applications yet.</p>
-            <p className="max-w-sm text-sm text-neutral-500">
-              Sync your Gmail to detect job application emails automatically.
-            </p>
-            <button
-              onClick={doSync}
-              disabled={syncing}
-              className="mt-2 rounded-md bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white disabled:opacity-60"
-            >
-              {syncing ? "Syncing…" : "Sync now"}
-            </button>
-          </div>
-        ) : (
           <div
             className={`grid gap-4 ${
               showIgnored ? "min-w-[1120px] grid-cols-5" : "min-w-[900px] grid-cols-4"
             }`}
           >
-            {columns.map((col) => {
-              const cards = all
-                .filter((a) => a.status === col.key)
-                .sort((a, b) => latestEmailTime(b) - latestEmailTime(a));
-              return (
-                <div
-                  key={col.key}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    if (draggingId != null) handleDrop(draggingId, col.key);
-                  }}
-                  className="flex flex-col gap-3 rounded-lg border border-neutral-800 bg-neutral-900/50 p-3"
-                >
-                  <div className="flex items-center justify-between px-1">
-                    <h2 className="text-sm font-semibold text-neutral-200">
-                      {col.label}
-                    </h2>
-                    <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400">
-                      {cards.length}
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    {cards.map((app) => (
-                      <Card
-                        key={app.id}
-                        app={app}
-                        onClick={() => setSelectedId(app.id)}
-                        onDragStart={() => setDraggingId(app.id)}
-                        onDragEnd={() => setDraggingId(null)}
-                      />
-                    ))}
-                    {cards.length === 0 && (
-                      <p className="px-1 py-2 text-xs text-neutral-600">
-                        No applications
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {(showIgnored ? [...COLUMNS, IGNORED_COLUMN] : COLUMNS).map((col) => (
+              <Column key={col.key} title={col.label} count={0} status={col.key}>
+                <div className="glass rounded-md h-20 animate-pulse" />
+                <div className="glass rounded-md h-20 animate-pulse" />
+              </Column>
+            ))}
           </div>
+        ) : loadError ? (
+          <p className="text-sm text-status-red-fg">{loadError}</p>
+        ) : all.length === 0 ? (
+          <div className="flex flex-1 items-center justify-center py-24">
+            <GlassPanel strength="strong" className="max-w-sm rounded-xl p-8 text-center">
+              <h2 className="mb-2 text-lg font-semibold tracking-tight text-ink">
+                No applications yet
+              </h2>
+              <p className="mb-6 text-sm text-ink-2">
+                Sync your Gmail to detect job application emails automatically.
+              </p>
+              <Button loading={syncing} onClick={doSync}>
+                {syncing ? "Syncing…" : "Sync now"}
+              </Button>
+            </GlassPanel>
+          </div>
+        ) : (
+          <LayoutGroup>
+            <div
+              className={`grid gap-4 ${
+                showIgnored ? "min-w-[1120px] grid-cols-5" : "min-w-[900px] grid-cols-4"
+              }`}
+            >
+              {columns.map((col) => {
+                const cards = all
+                  .filter((a) => a.status === col.key)
+                  .sort((a, b) => latestEmailTime(b) - latestEmailTime(a));
+                return (
+                  <Column
+                    key={col.key}
+                    title={col.label}
+                    count={cards.length}
+                    status={col.key}
+                    isOver={dragOverKey === col.key}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setDragOverKey(col.key);
+                    }}
+                    onDragEnter={(e) => {
+                      e.preventDefault();
+                      setDragOverKey(col.key);
+                    }}
+                    onDragLeave={(e) => {
+                      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                        setDragOverKey((cur) => (cur === col.key ? null : cur));
+                      }
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setDragOverKey(null);
+                      if (draggingId != null) handleDrop(draggingId, col.key);
+                    }}
+                  >
+                    <motion.div
+                      className="flex flex-col gap-2.5"
+                      initial="hidden"
+                      animate="show"
+                      variants={listStagger}
+                    >
+                      <AnimatePresence initial={false}>
+                        {cards.map((app) => (
+                          <Card
+                            key={app.id}
+                            app={app}
+                            dragging={draggingId === app.id}
+                            onClick={() => setSelectedId(app.id)}
+                            onDragStart={() => setDraggingId(app.id)}
+                            onDragEnd={() => {
+                              setDraggingId(null);
+                              setDragOverKey(null);
+                            }}
+                          />
+                        ))}
+                      </AnimatePresence>
+                      {cards.length === 0 && (
+                        <p className="px-1 py-2 text-xs text-ink-4">No applications</p>
+                      )}
+                    </motion.div>
+                  </Column>
+                );
+              })}
+            </div>
+          </LayoutGroup>
         )}
       </main>
 
@@ -294,11 +320,13 @@ export default function Board({ userEmail }: { userEmail: string }) {
 
 function Card({
   app,
+  dragging,
   onClick,
   onDragStart,
   onDragEnd,
 }: {
   app: Application;
+  dragging: boolean;
   onClick: () => void;
   onDragStart: () => void;
   onDragEnd: () => void;
@@ -310,23 +338,38 @@ function Card({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClick={onClick}
-      className="cursor-grab rounded-md border border-neutral-800 bg-neutral-900 p-3 text-sm shadow-sm transition hover:border-neutral-600 active:cursor-grabbing"
+      className={app.status === "ignored" ? "opacity-60" : undefined}
     >
-      <div className="flex items-start justify-between gap-2">
-        <p className="font-semibold text-neutral-100">{app.company}</p>
-        {app.user_edited === 1 && (
-          <span className="shrink-0 rounded-full bg-sky-950 px-1.5 py-0.5 text-[10px] font-medium text-sky-400">
-            edited
-          </span>
-        )}
-      </div>
-      {app.role && <p className="mt-0.5 text-neutral-400">{app.role}</p>}
-      <div className="mt-2 flex items-center justify-between text-xs text-neutral-500">
-        <span>{latest ? formatRelative(new Date(latest).toISOString()) : "no emails"}</span>
-        <span className="rounded-full bg-neutral-800 px-1.5 py-0.5">
-          {app.emails.length} {app.emails.length === 1 ? "email" : "emails"}
-        </span>
-      </div>
+      <motion.div
+        layout
+        layoutId={`app-${app.id}`}
+        transition={springSoft}
+        initial="hidden"
+        animate="show"
+        exit={{ opacity: 0, scale: 0.98 }}
+        variants={fadeUp}
+        whileHover={{ y: -2 }}
+        whileTap={{ scale: 0.98 }}
+        className={`glass rounded-md p-4 cursor-grab active:cursor-grabbing hover:shadow-glass-hover transition-shadow duration-(--dur-base) ${
+          dragging ? "opacity-50" : ""
+        }`.trim()}
+      >
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm font-semibold text-ink tracking-tight">{app.company}</p>
+          {app.user_edited === 1 && (
+            <Pill tone="neutral" size="xs" className="shrink-0">
+              edited
+            </Pill>
+          )}
+        </div>
+        {app.role && <p className="mt-0.5 text-sm text-ink-2">{app.role}</p>}
+        <div className="mt-3 flex items-center justify-between text-xs text-ink-3">
+          <span>{latest ? formatRelative(new Date(latest).toISOString()) : "no emails"}</span>
+          <Pill tone="neutral" size="xs">
+            {app.emails.length} {app.emails.length === 1 ? "email" : "emails"}
+          </Pill>
+        </div>
+      </motion.div>
     </div>
   );
 }

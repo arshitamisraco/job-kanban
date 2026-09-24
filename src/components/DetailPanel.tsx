@@ -99,7 +99,7 @@ export default function DetailPanel({
 
   return (
     <Sheet open onClose={onClose} title="Application details">
-      <div className="flex flex-1 flex-col gap-5 px-5 py-5">
+      <div className="flex flex-1 flex-col gap-5 px-6 py-6">
         <Field label="Company">
           <Input value={company} onChange={(e) => setCompany(e.target.value)} />
         </Field>
@@ -164,11 +164,10 @@ export default function DetailPanel({
           </AnimatePresence>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-line pt-5">
+        <div className="flex items-center gap-2 border-t border-line pt-5">
           <Button
             variant="secondary"
             size="sm"
-            className="justify-start"
             onClick={handleMarkIgnored}
             disabled={saving}
           >
@@ -177,7 +176,6 @@ export default function DetailPanel({
           <Button
             variant="danger"
             size="sm"
-            className="justify-start"
             onClick={handleDelete}
             disabled={saving}
           >
@@ -186,9 +184,11 @@ export default function DetailPanel({
         </div>
 
         <div className="border-t border-line pt-5">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-3">
-            Emails ({sortedEmails.length})
-          </h3>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-ink-3">
+              Emails ({sortedEmails.length})
+            </h3>
+          </div>
           {sortedEmails.length === 0 ? (
             <p className="text-xs text-ink-3">No emails linked.</p>
           ) : (
@@ -207,13 +207,19 @@ export default function DetailPanel({
                   <p className="text-sm font-medium text-ink">
                     {email.subject || "(no subject)"}
                   </p>
-                  <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-ink-3">
-                    <span>
-                      {email.from_addr || "unknown sender"} ·{" "}
-                      {formatRelative(email.received_at)}
+                  <p className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-3 min-w-0">
+                    <span className="truncate min-w-0">
+                      {email.from_addr || "unknown sender"}
+                    </span>
+                    <span className="shrink-0">
+                      · {formatRelative(email.received_at)}
                     </span>
                     {email.detected_status && (
-                      <StatusPill status={email.detected_status} size="xs" />
+                      <StatusPill
+                        status={email.detected_status}
+                        size="xs"
+                        className="shrink-0"
+                      />
                     )}
                   </p>
                   {email.snippet && (

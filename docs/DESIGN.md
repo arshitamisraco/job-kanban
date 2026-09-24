@@ -17,10 +17,11 @@ Use the Tailwind utilities generated from these (e.g. `bg-canvas`, `text-ink-2`,
 ### Color
 | token | value | use |
 |---|---|---|
-| `--color-canvas` | `#eef2f9` | page background base |
-| `--color-orb-1` | `#d6e4f7` | blurred orb (blue) |
-| `--color-orb-2` | `#e6ebf6` | blurred orb (lavender-grey) |
-| `--color-orb-3` | `#ffffff` | blurred orb (white glow) |
+| `--color-canvas` | `#eef2f9` | page background base (gradient top) |
+| `--color-canvas-2` | `#e9eef8` | page background gradient (bottom) |
+| `--color-orb-1` | `#cfdff5` | radial-gradient orb (blue) |
+| `--color-orb-2` | `#e3e8f5` | radial-gradient orb (lavender-grey) |
+| `--color-orb-3` | `#ffffff` | radial-gradient orb (white glow) |
 | `--color-ink` | `#1d1d1f` | primary text |
 | `--color-ink-2` | `#515154` | secondary text |
 | `--color-ink-3` | `#86868b` | tertiary / meta text |
@@ -31,6 +32,8 @@ Use the Tailwind utilities generated from these (e.g. `bg-canvas`, `text-ink-2`,
 | `--color-glass-soft` | `rgba(255,255,255,0.30)` | column fill |
 | `--color-glass-border` | `rgba(255,255,255,0.70)` | inner light border |
 | `--color-glass-edge` | `rgba(29,29,31,0.06)` | outer hairline |
+| `--color-field` | `rgba(29,29,31,0.035)` | input/select/textarea fill |
+| `--color-field-focus` | `rgba(255,255,255,0.9)` | input/select/textarea fill on focus |
 | `--color-scrim` | `rgba(29,29,31,0.18)` | modal backdrop (blurred) |
 | `--color-status-neutral` / `-neutral-bg` / `-neutral-fg` | `#a7aeb9` / `rgba(120,130,145,0.14)` / `#515154` | Applied, Ignored |
 | `--color-status-yellow` / `-yellow-bg` / `-yellow-fg` | `#d9b44a` / `rgba(217,180,74,0.18)` / `#735a14` | Interviewing |
@@ -67,6 +70,7 @@ Springs (exported from `src/components/ui/motion.ts`):
 - `spring` (default, calm): `{ type:"spring", stiffness: 380, damping: 32, mass: 0.8 }`
 - `springSoft` (sheets/layout): `{ type:"spring", stiffness: 260, damping: 30, mass: 1 }`
 - `hoverLift`: `whileHover={{ y:-2 }}`, `whileTap={{ scale:0.98 }}`
+- `exitFast`: 150ms ease-out tween for items leaving a list (keeps removed cards out of the DOM quickly).
 - `fadeUp` variants: `hidden {opacity:0, y:6}` → `show {opacity:1, y:0}`; list stagger `0.03s`.
 Reduced motion: `<MotionConfig reducedMotion="user">` in layout **and** a CSS `@media (prefers-reduced-motion: reduce)` block that sets transition/animation durations to ~0.
 
@@ -131,8 +135,8 @@ The Playwright smoke test `scripts/e2e-mock.mjs` relies on these selectors. Keep
 - `Switch`: the visible label text node is exactly the `label` prop, rendered as a plain `<span>{label}</span>` after the track, so `label:has-text("Show ignored")` will match the whole `<label>` element (input + track + text) — the click target is the entire component since it's one big native `<label>`.
 - `Button` variants: `primary` = `bg-ink text-white` with `hover:brightness-110` (not opacity, to keep the white text at full contrast); `secondary` = `.glass glass-strong` fill; `ghost` = transparent with `hover:bg-ink/5`; `danger` = bordered outline (`border-status-red/50` + `text-status-red-fg` + `hover:bg-status-red-bg`), not a filled button. `md` size is `h-9.5` per the doc's first option.
 - `npx tsc --noEmit`, `npm run lint`, and a runtime check against the already-running mock dev server (port 3120) all pass — see verification section of the handoff report for details. `Board.tsx`/`DetailPanel.tsx`/`page.tsx` were not touched and still use their old dark Tailwind classes, which is expected until B/C land.
-- [ ] Review 1 (screenshots, spacing, motion, contrast) → fixes
-- [ ] e2e smoke test green (`scripts/e2e-mock.mjs`), `npm run lint`, `npx tsc --noEmit`
+- [x] Review 1 (screenshots, spacing, motion, contrast) → fixes applied (orb banding → radial gradients, field tint, empty-state centering, action row, card title size, fast card exit)
+- [x] e2e smoke test green (`scripts/e2e-mock.mjs`), `npm run lint`, `npx tsc --noEmit`
 
 ### Notes from B
 - `Board.tsx` rewritten on the `ui/*` primitives per spec: `GlassPanel as="header" strength="strong"` sticky top bar,

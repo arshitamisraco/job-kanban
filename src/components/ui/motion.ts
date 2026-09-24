@@ -29,3 +29,9 @@ export const listStagger: Variants = {
     transition: { staggerChildren: 0.03 },
   },
 };
+
+/** Quick, calm exit for items leaving a list (mirrors --dur-fast). */
+export const exitFast: Transition = {
+  duration: 0.15,
+  ease: [0.22, 1, 0.36, 1],
+};

@@ -14,6 +14,7 @@ import {
   Pill,
   Switch,
   Toast,
+  exitFast,
   fadeUp,
   listStagger,
   springSoft,
@@ -187,10 +188,12 @@ export default function Board({ userEmail }: { userEmail: string }) {
           <span className="text-sm text-ink-3">{userEmail}</span>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Toast message={syncToast} />
-          <span className="text-xs text-ink-3 tabular-nums">
-            Synced {formatRelative(lastSyncedAt)}
-          </span>
+          <div className="hidden sm:flex items-center gap-3">
+            <Toast message={syncToast} />
+            <span className="text-xs text-ink-3 tabular-nums">
+              Synced {formatRelative(lastSyncedAt)}
+            </span>
+          </div>
           <Switch
             checked={showIgnored}
             onChange={(e) => setShowIgnored(e.target.checked)}
@@ -205,7 +208,7 @@ export default function Board({ userEmail }: { userEmail: string }) {
         </div>
       </GlassPanel>
 
-      <main className="flex-1 overflow-x-auto px-6 py-6">
+      <main className="flex flex-1 flex-col overflow-x-auto px-6 py-6">
         {loading ? (
           <div
             className={`grid gap-4 ${
@@ -220,9 +223,11 @@ export default function Board({ userEmail }: { userEmail: string }) {
             ))}
           </div>
         ) : loadError ? (
-          <p className="text-sm text-status-red-fg">{loadError}</p>
+          <div className="flex flex-1 items-center justify-center">
+            <p className="text-sm text-status-red-fg">{loadError}</p>
+          </div>
         ) : all.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center py-24">
+          <div className="flex flex-1 items-center justify-center">
             <GlassPanel strength="strong" className="max-w-sm rounded-xl p-8 text-center">
               <h2 className="mb-2 text-lg font-semibold tracking-tight text-ink">
                 No applications yet
@@ -294,7 +299,7 @@ export default function Board({ userEmail }: { userEmail: string }) {
                         ))}
                       </AnimatePresence>
                       {cards.length === 0 && (
-                        <p className="px-1 py-2 text-xs text-ink-4">No applications</p>
+                        <p className="px-1 py-2 text-xs text-ink-3">No applications</p>
                       )}
                     </motion.div>
                   </Column>
@@ -346,7 +351,7 @@ function Card({
         transition={springSoft}
         initial="hidden"
         animate="show"
-        exit={{ opacity: 0, scale: 0.98 }}
+        exit={{ opacity: 0, scale: 0.98, transition: exitFast }}
         variants={fadeUp}
         whileHover={{ y: -2 }}
         whileTap={{ scale: 0.98 }}
@@ -355,7 +360,7 @@ function Card({
         }`.trim()}
       >
         <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-semibold text-ink tracking-tight">{app.company}</p>
+          <p className="text-base font-semibold tracking-tight text-ink leading-snug">{app.company}</p>
           {app.user_edited === 1 && (
             <Pill tone="neutral" size="xs" className="shrink-0">
               edited

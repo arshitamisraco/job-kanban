@@ -4,7 +4,7 @@ import type {
 } from "react";
 
 export const fieldClass =
-  "w-full rounded-sm border border-glass-edge bg-glass-strong px-3 py-2 text-sm text-ink placeholder:text-ink-4 transition-[box-shadow,border-color] duration-(--dur-fast) focus-visible:shadow-focus";
+  "w-full rounded-sm border border-glass-edge bg-field px-3 py-2 text-sm text-ink placeholder:text-ink-4 transition-[box-shadow,border-color,background-color] duration-(--dur-fast) hover:border-ink/15 focus-visible:bg-field-focus focus-visible:shadow-focus";
 
 function mergeClass(base: string, className?: string) {
   return className ? `${base} ${className}` : base;

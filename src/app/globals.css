@@ -3,8 +3,9 @@
 :root {
   /* Color */
   --color-canvas: #eef2f9;
-  --color-orb-1: #d6e4f7;
-  --color-orb-2: #e6ebf6;
+  --color-canvas-2: #e9eef8;
+  --color-orb-1: #cfdff5;
+  --color-orb-2: #e3e8f5;
   --color-orb-3: #ffffff;
 
   --color-ink: #1d1d1f;
@@ -19,6 +20,9 @@
   --color-glass-soft: rgba(255, 255, 255, 0.30);
   --color-glass-border: rgba(255, 255, 255, 0.70);
   --color-glass-edge: rgba(29, 29, 31, 0.06);
+
+  --color-field: rgba(29, 29, 31, 0.035);
+  --color-field-focus: rgba(255, 255, 255, 0.9);
 
   --color-scrim: rgba(29, 29, 31, 0.18);
 
@@ -84,6 +88,7 @@
 
 @theme inline {
   --color-canvas: var(--color-canvas);
+  --color-canvas-2: var(--color-canvas-2);
   --color-orb-1: var(--color-orb-1);
   --color-orb-2: var(--color-orb-2);
   --color-orb-3: var(--color-orb-3);
@@ -100,6 +105,9 @@
   --color-glass-soft: var(--color-glass-soft);
   --color-glass-border: var(--color-glass-border);
   --color-glass-edge: var(--color-glass-edge);
+
+  --color-field: var(--color-field);
+  --color-field-focus: var(--color-field-focus);
 
   --color-scrim: var(--color-scrim);
 

@@ -11,18 +11,18 @@ type Orb = {
 
 const ORBS: Orb[] = [
   {
-    className: "absolute -top-[10vw] -left-[10vw] h-[55vw] w-[55vw] rounded-pill bg-orb-1 opacity-70",
-    style: { filter: "blur(var(--blur-orb))" },
+    className: "absolute -top-[25vw] -left-[20vw] h-[70vw] w-[70vw] rounded-pill",
+    style: { background: "radial-gradient(circle at center, var(--color-orb-1) 0%, transparent 70%)" },
     duration: 48,
   },
   {
-    className: "absolute top-[10vh] -right-[10vw] h-[45vw] w-[45vw] rounded-pill bg-orb-2 opacity-80",
-    style: { filter: "blur(var(--blur-orb))" },
+    className: "absolute top-[5vh] -right-[25vw] h-[60vw] w-[60vw] rounded-pill",
+    style: { background: "radial-gradient(circle at center, var(--color-orb-2) 0%, transparent 70%)" },
     duration: 56,
   },
   {
-    className: "absolute -bottom-[12vw] left-[5vw] h-[40vw] w-[40vw] rounded-pill bg-orb-3 opacity-90",
-    style: { filter: "blur(var(--blur-orb))" },
+    className: "absolute -bottom-[20vw] left-[10vw] h-[55vw] w-[55vw] rounded-pill",
+    style: { background: "radial-gradient(circle at center, var(--color-orb-3) 0%, transparent 70%)" },
     duration: 40,
   },
 ];
@@ -31,7 +31,11 @@ export function Background() {
   const reducedMotion = useReducedMotion();
 
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-canvas">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      style={{ background: "linear-gradient(180deg, var(--color-canvas) 0%, var(--color-canvas-2) 100%)" }}
+    >
       {ORBS.map((orb, index) => (
         <motion.div
           key={index}

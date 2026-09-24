@@ -1,0 +1,122 @@
+[
+  {
+    "gmail_id": "mock001",
+    "thread_id": "thread001",
+    "subject": "Thank you for applying to Acme Corp!",
+    "from_addr": "Acme Corp Recruiting <no-reply@greenhouse.io>",
+    "received_at": "2026-07-02T15:04:00.000Z",
+    "snippet": "Thanks for applying to the Senior Backend Engineer position at Acme Corp. We've received your application and will be in touch soon.",
+    "bodyText": "Hi Arshita,\n\nThank you for applying to the Senior Backend Engineer position at Acme Corp. This email confirms that we have received your application.\n\nOur team reviews every application carefully. If your background is a match, a recruiter will reach out within the next couple of weeks.\n\nThanks again for your interest in Acme Corp.\n\nBest,\nAcme Corp Talent Team",
+    "gmail_link": "https://mail.google.com/mail/u/0/#all/mock001"
+  },
+  {
+    "gmail_id": "mock002",
+    "thread_id": "thread002",
+    "subject": "Your application to Nimbus Data",
+    "from_addr": "Nimbus Data via Lever <no-reply@hire.lever.co>",
+    "received_at": "2026-07-10T18:22:00.000Z",
+    "snippet": "We received your application for the Data Platform Engineer role at Nimbus Data. Our hiring team will review it shortly.",
+    "bodyText": "Hello,\n\nWe received your application for the Data Platform Engineer role at Nimbus Data.\n\nOur hiring team reviews every application and we will follow up if there is a fit. Thank you for your interest in joining Nimbus Data.\n\n- Nimbus Data Hiring Team",
+    "gmail_link": "https://mail.google.com/mail/u/0/#all/mock002"
+  },
+  {
+    "gmail_id": "mock003",
+    "thread_id": "thread003",
+    "subject": "Application received: Initech",
+    "from_addr": "Initech Careers <careers@myworkday.com>",
+    "received_at": "2026-07-15T13:45:00.000Z",
+    "snippet": "Thank you for your interest in the Product Manager position at Initech. Your application has been submitted successfully.",
+    "bodyText": "Dear Candidate,\n\nThank you for your interest in the Product Manager position at Initech. We received your application and it is now under review by our recruiting team.\n\nWe will contact you if we would like to move forward.\n\nRegards,\nInitech Talent Acquisition",
+    "gmail_link": "https://mail.google.com/mail/u/0/#all/mock003"
+  },
+  {
+    "gmail_id": "mock004",
+    "thread_id": "thread001",
+    "subject": "Let's schedule an interview - Acme Corp",
+    "from_addr": "Priya Shah <priya.shah@acmecorp.com>",
+    "received_at": "2026-07-20T16:30:00.000Z",
+    "snippet": "We'd love to schedule a phone screen with you for the Senior Backend Engineer role. Are you free this week?",
+    "bodyText": "Hi Arshita,\n\nThanks for your patience! We reviewed your application for the Senior Backend Engineer role at Acme Corp and would love to schedule a phone screen with our engineering manager.\n\nCould you share your availability this week for a 30-minute call?\n\nBest,\nPriya Shah\nAcme Corp Recruiting",
+    "gmail_link": "https://mail.google.com/mail/u/0/#all/mock004"
+  },
+  {
+    "gmail_id": "mock005",
+    "thread_id": "thread002",
+    "subject": "Nimbus Data: phone screen next steps",
+    "from_addr": "Jordan Lee <jordan.lee@nimbusdata.io>",
+    "received_at": "2026-07-25T12:00:00.000Z",
+    "snippet": "Great news - we'd like to set up a phone screen for the Data Platform Engineer role. Please pick a time below.",
+    "bodyText": "Hi Arshita,\n\nGreat news! We'd like to schedule a phone screen for the Data Platform Engineer position at Nimbus Data.\n\nPlease use the link below to pick a 30-minute slot that works for you this week.\n\nLooking forward to chatting,\nJordan Lee\nNimbus Data Recruiting",
+    "gmail_link": "https://mail.google.com/mail/u/0/#all/mock005"
+  },
+  {
+    "gmail_id": "mock006",
+    "thread_id": "thread001",
+    "subject": "Update on your application to Acme Corp",
+    "from_addr": "Acme Corp Recruiting <recruiting@acmecorp.com>",
+    "received_at": "2026-08-05T17:10:00.000Z",
+    "snippet": "Thank you for taking the time to interview with us. Unfortunately, we have decided to move forward with other candidates.",
+    "bodyText": "Hi Arshita,\n\nThank you for taking the time to speak with our team about the Senior Backend Engineer role.\n\nAfter careful consideration, we have decided to move forward with other candidates whose experience more closely matches our current needs. Unfortunately we will not be proceeding further at this time.\n\nWe appreciate your interest in Acme Corp and wish you the best in your search.\n\nBest,\nAcme Corp Recruiting",
+    "gmail_link": "https://mail.google.com/mail/u/0/#all/mock006"
+  },
+  {
+    "gmail_id": "mock007",
+    "thread_id": "thread003",
+    "subject": "We're pleased to offer you a position at Initech",
+    "from_addr": "Initech Careers <careers@initech.com>",
+    "received_at": "2026-08-12T14:00:00.000Z",
+    "snippet": "Congratulations! We are pleased to offer you the Product Manager position at Initech. Please find the offer letter attached.",
+    "bodyText": "Dear Arshita,\n\nCongratulations! We are pleased to offer you the Product Manager position at Initech.\n\nPlease find your official offer letter attached, along with details on compensation, start date, and benefits. Let us know if you have any questions.\n\nWelcome to the team,\nInitech HR",
+    "gmail_link": "https://mail.google.com/mail/u/0/#all/mock007"
+  },
+  {
+    "gmail_id": "mock008",
+    "thread_id": "thread004",
+    "subject": "Thank you for applying to Bluepeak Analytics",
+    "from_addr": "Bluepeak Analytics <no-reply@ashbyhq.com>",
+    "received_at": "2026-08-18T09:20:00.000Z",
+    "snippet": "We received your application for the Data Scientist role at Bluepeak Analytics. Thanks for your interest in joining our team.",
+    "bodyText": "Hi Arshita,\n\nThanks for applying for the Data Scientist role at Bluepeak Analytics! This confirms that we have received your application.\n\nOur recruiting team will review your background and reach out if there's a match.\n\nThanks,\nBluepeak Analytics Talent Team",
+    "gmail_link": "https://mail.google.com/mail/u/0/#all/mock008"
+  },
+  {
+    "gmail_id": "mock009",
+    "thread_id": "thread004",
+    "subject": "Bluepeak Analytics - schedule a call?",
+    "from_addr": "Sam Rivera <sam.rivera@bluepeakanalytics.com>",
+    "received_at": "2026-08-27T11:15:00.000Z",
+    "snippet": "We'd like to schedule a call to discuss your background for the Data Scientist position. Let us know your availability.",
+    "bodyText": "Hi Arshita,\n\nWe enjoyed reading through your application for the Data Scientist position at Bluepeak Analytics and would like to schedule an interview with our team lead.\n\nCould you let us know your availability over the next few days?\n\nBest,\nSam Rivera\nBluepeak Analytics",
+    "gmail_link": "https://mail.google.com/mail/u/0/#all/mock009"
+  },
+  {
+    "gmail_id": "mock010",
+    "thread_id": "thread005",
+    "subject": "Your Morning Brew: markets, AI, and more",
+    "from_addr": "Morning Brew <crew@morningbrew.com>",
+    "received_at": "2026-08-28T10:00:00.000Z",
+    "snippet": "Today's top stories: the Fed's next move, a new AI chip announcement, and why coffee prices are climbing.",
+    "bodyText": "Good morning!\n\nHere's what you need to know today: the Fed is signaling a possible rate change next quarter, a major chip maker just unveiled a new AI accelerator, and coffee futures are up 12% this month.\n\nRead the full stories on our site.\n\n- The Morning Brew Team",
+    "gmail_link": "https://mail.google.com/mail/u/0/#all/mock010"
+  },
+  {
+    "gmail_id": "mock011",
+    "thread_id": "thread006",
+    "subject": "Your Amazon.com order has shipped",
+    "from_addr": "Amazon.com <shipment-tracking@amazon.com>",
+    "received_at": "2026-08-29T20:45:00.000Z",
+    "snippet": "Your package containing 'USB-C Charging Cable, 6ft (2-Pack)' has shipped and is on its way.",
+    "bodyText": "Hello,\n\nYour order #112-4456789-1234567 has shipped.\n\nItem: USB-C Charging Cable, 6ft (2-Pack)\nExpected delivery: Tomorrow by 9pm\n\nTrack your package using the link in your orders page.\n\nThanks for shopping with us,\nAmazon.com",
+    "gmail_link": "https://mail.google.com/mail/u/0/#all/mock011"
+  },
+  {
+    "gmail_id": "mock012",
+    "thread_id": "thread007",
+    "subject": "New releases picked for you this week",
+    "from_addr": "Spotify <no-reply@spotify.com>",
+    "received_at": "2026-09-01T08:30:00.000Z",
+    "snippet": "Check out this week's new releases from artists you follow, plus playlists picked just for you.",
+    "bodyText": "Hi there,\n\nThis week's new releases are here! We picked a few albums and singles from artists you follow, plus a few playlists we think you'll like based on your listening.\n\nOpen Spotify to check them out.\n\n- The Spotify Team",
+    "gmail_link": "https://mail.google.com/mail/u/0/#all/mock012"
+  }
+]

@@ -99,8 +99,8 @@ export interface Classification { is_job_related: boolean; company: string|null;
 
 ## Status
 - [x] Scaffold Next.js (lead)
-- [ ] Task A backend (Sonnet)
-- [ ] Task B frontend (Sonnet)
+- [x] Task A backend (Sonnet)
+- [x] Task B frontend (Sonnet)
 - [ ] Integration + end-to-end check in MOCK_MODE (Sonnet)
 - [ ] Security review (Opus, short)
 - [ ] README

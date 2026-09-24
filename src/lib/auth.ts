@@ -1,12 +1,16 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
+import { getToken } from 'next-auth/jwt';
 import type { JWT } from 'next-auth/jwt';
+import { headers as nextHeaders } from 'next/headers';
+import { isMockMode } from './env';
 
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
 declare module 'next-auth' {
   interface Session {
-    accessToken?: string;
+    // accessToken/refreshToken intentionally NOT exposed here - they stay
+    // server-side only (in the JWT). Use requireSession() to read them.
     error?: string;
   }
 }
@@ -67,7 +71,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ user }) {
       const allowed = process.env.ALLOWED_EMAIL;
-      if (!allowed) return true;
+      if (!allowed) return false; // no allowlist configured -> deny everyone
       const email = user.email ?? '';
       return email.toLowerCase() === allowed.toLowerCase();
     },
@@ -85,7 +89,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return refreshAccessToken(token);
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken;
+      // Do NOT put token.accessToken / token.refreshToken on session - the
+      // session object is readable by the client (e.g. GET /api/auth/session).
+      // Access tokens stay server-side only; read them via requireSession().
       session.error = token.error;
       return session;
     },
@@ -98,13 +104,26 @@ export interface RequireSessionResult {
 }
 
 export async function requireSession(): Promise<RequireSessionResult | null> {
-  if (process.env.MOCK_MODE === '1') {
+  if (isMockMode()) {
     return {
       email: process.env.ALLOWED_EMAIL ?? 'mock@example.com',
       accessToken: 'mock',
     };
   }
+  const allowed = process.env.ALLOWED_EMAIL;
   const session = await auth();
-  if (!session?.user?.email || !session.accessToken) return null;
-  return { email: session.user.email, accessToken: session.accessToken };
+  if (!session?.user?.email || !allowed) return null;
+  if (session.user.email.toLowerCase() !== allowed.toLowerCase()) return null;
+
+  // Access token lives only in the JWT (never on the client-visible session
+  // object), so read it server-side via getToken().
+  const hdrs = await nextHeaders();
+  const token = await getToken({
+    req: { headers: hdrs },
+    secret: process.env.AUTH_SECRET,
+    secureCookie: process.env.NODE_ENV === 'production',
+  });
+  if (!token?.accessToken) return null;
+
+  return { email: session.user.email, accessToken: token.accessToken };
 }

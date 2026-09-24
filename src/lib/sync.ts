@@ -164,9 +164,13 @@ export async function runSync(session: RequireSessionResult): Promise<SyncResult
     console.error('runSync failed', err);
   }
 
-  const epochForNextSync = Math.floor(syncStartMs / 1000) - 300; // 5 min overlap, dedupe handles repeats
   const lastSyncAtIso = new Date(syncStartMs).toISOString();
-  setSyncState('last_sync_epoch', String(epochForNextSync));
+  if (!errorMsg) {
+    // Only move the watermark forward when the sync actually completed;
+    // on error, keep retrying from the last known-good point.
+    const epochForNextSync = Math.floor(syncStartMs / 1000) - 300; // 5 min overlap, dedupe handles repeats
+    setSyncState('last_sync_epoch', String(epochForNextSync));
+  }
   setSyncState('last_sync_at', lastSyncAtIso);
   setSyncState('last_error', errorMsg ?? '');
 

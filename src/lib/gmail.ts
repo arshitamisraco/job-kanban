@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { google } from 'googleapis';
+import { isMockMode } from './env';
 
 export interface FetchedEmail {
   gmail_id: string;
@@ -38,7 +39,7 @@ export async function listMessageIds(
   query: string,
   maxResults = 200
 ): Promise<string[]> {
-  if (process.env.MOCK_MODE === '1') {
+  if (isMockMode()) {
     return loadMock()
       .map((m) => m.gmail_id)
       .slice(0, maxResults);
@@ -118,7 +119,7 @@ function extractBodyText(payload: GmailPart | null | undefined): string {
 }
 
 export async function getMessage(accessToken: string, id: string): Promise<FetchedEmail | null> {
-  if (process.env.MOCK_MODE === '1') {
+  if (isMockMode()) {
     return loadMock().find((m) => m.gmail_id === id) ?? null;
   }
 

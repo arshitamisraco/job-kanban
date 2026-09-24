@@ -8,11 +8,16 @@ export const dynamic = 'force-dynamic';
 
 const VALID_STATUSES: Status[] = ['applied', 'interviewing', 'offer', 'rejected', 'ignored'];
 const MAX_LEN = 200;
+const MAX_NOTES_LEN = 2000;
 
-function trimmedString(value: unknown): string | null | undefined {
+function trimmedString(value: unknown, maxLen = MAX_LEN): string | null | undefined {
   if (value === null) return null;
   if (typeof value !== 'string') return undefined;
-  return value.trim().slice(0, MAX_LEN);
+  return value.trim().slice(0, maxLen);
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 interface RouteContext {
@@ -36,12 +41,16 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     return NextResponse.json({ error: 'not found' }, { status: 404 });
   }
 
-  let body: Record<string, unknown>;
+  let parsedBody: unknown;
   try {
-    body = await request.json();
+    parsedBody = await request.json();
   } catch {
     return NextResponse.json({ error: 'invalid json body' }, { status: 400 });
   }
+  if (!isPlainObject(parsedBody)) {
+    return NextResponse.json({ error: 'body must be a JSON object' }, { status: 400 });
+  }
+  const body = parsedBody;
 
   const patch: Partial<{
     company: string;
@@ -78,7 +87,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 
   if ('notes' in body) {
-    const notes = trimmedString(body.notes);
+    const notes = trimmedString(body.notes, MAX_NOTES_LEN);
     if (notes === undefined) {
       return NextResponse.json({ error: 'notes must be a string or null' }, { status: 400 });
     }

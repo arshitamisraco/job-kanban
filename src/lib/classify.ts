@@ -114,8 +114,12 @@ export async function classifyEmail(input: ClassifyInput): Promise<Classificatio
 
     const raw = toolUse.input as Record<string, unknown>;
     const is_job_related = Boolean(raw.is_job_related);
-    const company = typeof raw.company === 'string' && raw.company.trim() ? raw.company.trim() : null;
-    const role = typeof raw.role === 'string' && raw.role.trim() ? raw.role.trim() : null;
+    const company =
+      typeof raw.company === 'string' && raw.company.trim()
+        ? raw.company.trim().slice(0, 200)
+        : null;
+    const role =
+      typeof raw.role === 'string' && raw.role.trim() ? raw.role.trim().slice(0, 200) : null;
     const status = isValidStatus(raw.status) ? raw.status : null;
     const confidence = clampConfidence(raw.confidence);
 

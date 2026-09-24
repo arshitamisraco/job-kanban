@@ -104,3 +104,4 @@ export interface Classification { is_job_related: boolean; company: string|null;
 - [x] Integration + end-to-end check in MOCK_MODE (Sonnet)
 - [ ] Security review (Opus, short)
 - [x] README
+- [x] Security review fixes applied

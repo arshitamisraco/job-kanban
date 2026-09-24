@@ -46,7 +46,6 @@ function createDb(): Database.Database {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var __appDb: Database.Database | undefined;
 }
 

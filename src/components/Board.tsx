@@ -16,6 +16,11 @@ const COLUMNS: { key: Status; label: string }[] = [
   { key: "rejected", label: "Rejected" },
 ];
 
+const IGNORED_COLUMN: { key: Status; label: string } = {
+  key: "ignored",
+  label: "Ignored",
+};
+
 function latestEmailTime(app: Application): number {
   let max = 0;
   for (const email of app.emails) {
@@ -156,9 +161,9 @@ export default function Board({ userEmail }: { userEmail: string }) {
   }
 
   const all = applications ?? [];
-  const visible = showIgnored ? all : all.filter((a) => a.status !== "ignored");
   const selected = all.find((a) => a.id === selectedId) ?? null;
   const ignoredCount = all.filter((a) => a.status === "ignored").length;
+  const columns = showIgnored ? [...COLUMNS, IGNORED_COLUMN] : COLUMNS;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -224,9 +229,13 @@ export default function Board({ userEmail }: { userEmail: string }) {
             </button>
           </div>
         ) : (
-          <div className="grid min-w-[900px] grid-cols-4 gap-4">
-            {COLUMNS.map((col) => {
-              const cards = visible
+          <div
+            className={`grid gap-4 ${
+              showIgnored ? "min-w-[1120px] grid-cols-5" : "min-w-[900px] grid-cols-4"
+            }`}
+          >
+            {columns.map((col) => {
+              const cards = all
                 .filter((a) => a.status === col.key)
                 .sort((a, b) => latestEmailTime(b) - latestEmailTime(a));
               return (

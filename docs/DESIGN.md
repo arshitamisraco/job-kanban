@@ -108,9 +108,28 @@ The Playwright smoke test `scripts/e2e-mock.mjs` relies on these selectors. Keep
 - Glass readability: body text on glass is always `ink` / `ink-2`; never lighter than `ink-3` for anything a user must read.
 
 ## Status
-- [ ] A — tokens, globals.css, layout, `ui/*` primitives
+- [x] A — tokens, globals.css, layout, `ui/*` primitives
 - [ ] B — Board.tsx (+ Card) on primitives with motion
 - [ ] C — DetailPanel.tsx + page.tsx on primitives
+
+### Notes from A
+- All tokens live in `src/app/globals.css` under `:root` and are mapped 1:1 (same
+  variable names) into `@theme inline`. This is intentional and verified to work: Tailwind
+  emits its own `@layer theme { :root { --color-canvas: var(--color-canvas); } }`, but that's
+  a *layered* rule, and our own `:root { --color-canvas: #eef2f9; ... }` is unlayered, so per
+  CSS cascade-layer rules the unlayered literal value always wins. Don't "fix" this into
+  looking non-circular — it's correct and empirically checked with a standalone PostCSS build.
+- Tone class names (use these exactly, not `bg-status-<tone>` alone unless you mean the solid dot color):
+  - Solid (dots, `Pill dot`, `Column` status dot): `bg-status-neutral` / `bg-status-yellow` / `bg-status-green` / `bg-status-red`.
+  - Tinted background+text pairs (pills, badges): `bg-status-<tone>-bg` + `text-status-<tone>-fg`.
+  - Ring/opacity modifiers work via Tailwind's color-mix, e.g. `ring-status-green/40`, `border-status-red/50` — confirmed to compile correctly.
+  - Status→tone mapping and labels are exported from `ui/Pill.tsx` as `STATUS_TONE` and `STATUS_LABEL` — import those instead of re-deriving them.
+- `.glass` variants: base fill is plain `glass`. Soft/strong are **additive** modifier classes applied together with `glass`, i.e. `"glass glass-soft"` or `"glass glass-strong"` — `glass-soft`/`glass-strong` alone do nothing (no blur/border/shadow) since those live on `.glass`. `GlassPanel`'s `strength` prop (`"soft" | "base" | "strong"`) already produces the right combined className for you — prefer using `GlassPanel` over hand-rolling `.glass` combinations.
+- `duration-(--dur-fast)` / `duration-(--dur-base)` and `ease-(--ease-out)` (Tailwind v4 arbitrary-var syntax) work as expected and are used throughout `ui/*` — no fallback to `[transition-duration:var(...)]` was needed.
+- `Column` uses a plain `div` (not `motion.div`) since the fill/ring change is handled by a CSS `transition-[...]` class; feel free to wrap children in `motion` yourselves (e.g. `layoutId`/`layout` for cards) — `Column` just passes through `children` and any extra div props (`onDragOver`, `onDrop`, `className`, etc.).
+- `Switch`: the visible label text node is exactly the `label` prop, rendered as a plain `<span>{label}</span>` after the track, so `label:has-text("Show ignored")` will match the whole `<label>` element (input + track + text) — the click target is the entire component since it's one big native `<label>`.
+- `Button` variants: `primary` = `bg-ink text-white` with `hover:brightness-110` (not opacity, to keep the white text at full contrast); `secondary` = `.glass glass-strong` fill; `ghost` = transparent with `hover:bg-ink/5`; `danger` = bordered outline (`border-status-red/50` + `text-status-red-fg` + `hover:bg-status-red-bg`), not a filled button. `md` size is `h-9.5` per the doc's first option.
+- `npx tsc --noEmit`, `npm run lint`, and a runtime check against the already-running mock dev server (port 3120) all pass — see verification section of the handoff report for details. `Board.tsx`/`DetailPanel.tsx`/`page.tsx` were not touched and still use their old dark Tailwind classes, which is expected until B/C land.
 - [ ] Review 1 (screenshots, spacing, motion, contrast) → fixes
 - [ ] e2e smoke test green (`scripts/e2e-mock.mjs`), `npm run lint`, `npx tsc --noEmit`
 

@@ -30,6 +30,8 @@ Open http://localhost:3000. Mock mode skips Google sign-in (fakes a session)
 and reads from `src/mock/emails.json` instead of Gmail, so you can try the
 whole app — board, drag-and-drop, edit, ignore, sync — with zero setup.
 `ALLOWED_EMAIL` and `AUTH_SECRET` are optional in this mode.
+For screen recordings, `npm run dev:demo` resets the database on start, shows
+13 of the 16 mock emails, and reveals one more on each sync.
 
 ### Real mode (your Gmail)
 

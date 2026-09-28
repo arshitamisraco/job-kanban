@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:mock": "MOCK_MODE=1 NEXT_PUBLIC_MOCK_MODE=1 next dev",
+    "dev:demo": "AUTH_SECRET=demo MOCK_MODE=1 NEXT_PUBLIC_MOCK_MODE=1 NEXT_PUBLIC_MOCK_USER_LABEL=\"Arshita's Gmail\" MOCK_FRESH_DB=1 MOCK_INITIAL=13 MOCK_REVEAL_PER_SYNC=1 next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

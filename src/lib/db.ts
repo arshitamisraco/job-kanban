@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import Database from 'better-sqlite3';
+import { isMockMode } from './env';
 import type { Application, EmailSummary, Status } from './types';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -9,6 +10,13 @@ const DB_PATH = path.join(DATA_DIR, 'app.db');
 function createDb(): Database.Database {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+  // Demo affordance: start a recording from an empty board. Mock mode only, and only on
+  // the first open per server process (the db handle is cached on globalThis in dev).
+  if (isMockMode() && process.env.MOCK_FRESH_DB === '1') {
+    for (const suffix of ['', '-wal', '-shm']) {
+      fs.rmSync(DB_PATH + suffix, { force: true });
+    }
   }
   const database = new Database(DB_PATH);
   database.pragma('journal_mode = WAL');

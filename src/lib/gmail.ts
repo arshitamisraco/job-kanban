@@ -34,13 +34,48 @@ function loadMock(): FetchedEmail[] {
   return mockCache;
 }
 
+// Demo affordance (mock mode only): reveal the mock inbox gradually so a recording can show
+// new mail arriving. MOCK_INITIAL is how many messages exist on the first sync (default: all)
+// and MOCK_REVEAL_PER_SYNC is how many more appear on each later sync (default 0). With both
+// unset every message is returned every time. Note the Board calls sync on mount, which is
+// sync call #1 (it sees MOCK_INITIAL messages); the first "Sync now" click is call #2.
+let mockSyncCalls = 0;
+let mockLastCallAt = 0;
+let mockLastCount = 0;
+// React StrictMode (dev) mounts the Board twice, firing two syncs back to back. Calls this
+// close together count as one sync so the initial load still shows exactly MOCK_INITIAL.
+const MOCK_COALESCE_MS = 1000;
+
+function envInt(name: string): number | null {
+  const n = Number.parseInt(process.env[name] ?? '', 10);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+function mockVisibleCount(total: number): number {
+  const now = Date.now();
+  if (mockSyncCalls > 0 && now - mockLastCallAt < MOCK_COALESCE_MS) {
+    mockLastCallAt = now;
+    return mockLastCount;
+  }
+  const initial = envInt('MOCK_INITIAL') ?? total;
+  const perSync = envInt('MOCK_REVEAL_PER_SYNC') ?? 0;
+  mockLastCount = Math.min(total, initial + mockSyncCalls * perSync);
+  mockSyncCalls += 1;
+  mockLastCallAt = now;
+  return mockLastCount;
+}
+
 export async function listMessageIds(
   accessToken: string,
   query: string,
   maxResults = 200
 ): Promise<string[]> {
   if (isMockMode()) {
-    return loadMock()
+    const all = loadMock()
+      .slice()
+      .sort((a, b) => (a.received_at ?? '').localeCompare(b.received_at ?? ''));
+    return all
+      .slice(0, mockVisibleCount(all.length))
       .map((m) => m.gmail_id)
       .slice(0, maxResults);
   }

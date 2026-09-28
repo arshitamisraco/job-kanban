@@ -9,7 +9,9 @@ const MOCK_MODE = process.env.NEXT_PUBLIC_MOCK_MODE === "1";
 
 export default function Home() {
   if (MOCK_MODE) {
-    return <Board userEmail="mock user" />;
+    return (
+      <Board userEmail={process.env.NEXT_PUBLIC_MOCK_USER_LABEL ?? "mock user"} />
+    );
   }
   return <AuthGate />;
 }
@@ -37,7 +39,7 @@ function AuthGate() {
             className="w-full max-w-sm p-8 text-center rounded-xl"
           >
             <h1 className="text-xl font-semibold tracking-tight text-ink">
-              Job Kanban
+              Gmail Job Tracker
             </h1>
             <p className="mb-6 mt-2 text-sm text-ink-2">
               Sign in to track job applications detected from your Gmail inbox.

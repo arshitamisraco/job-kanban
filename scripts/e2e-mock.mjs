@@ -29,7 +29,7 @@ async function main() {
 
   console.log('1. Load board');
   await page.goto(BASE_URL, { waitUntil: 'networkidle' });
-  await page.waitForSelector('text=Job Kanban');
+  await page.waitForSelector('text=Gmail Job Tracker');
   await page.waitForSelector('text=Applied');
   await page.waitForSelector('text=Acme Corp', { timeout: 15000 });
 

@@ -4,7 +4,7 @@ import Background from "@/components/ui/Background";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Job Kanban",
+  title: "Gmail Job Tracker",
   description: "Track job applications detected from your Gmail inbox.",
 };
 

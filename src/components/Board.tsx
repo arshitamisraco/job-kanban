@@ -184,7 +184,7 @@ export default function Board({ userEmail }: { userEmail: string }) {
         className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-3 rounded-none border-x-0 border-t-0 px-6 py-4"
       >
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold tracking-tight text-ink">Job Kanban</h1>
+          <h1 className="text-lg font-semibold tracking-tight text-ink">Gmail Job Tracker</h1>
           <span className="text-sm text-ink-3">{userEmail}</span>
         </div>
         <div className="flex flex-wrap items-center gap-3">

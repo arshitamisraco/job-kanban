@@ -97,7 +97,7 @@ Reduced motion: `<MotionConfig reducedMotion="user">` in layout **and** a CSS `@
 
 ## Hard constraints (functionality + tests) — do not break
 The Playwright smoke test `scripts/e2e-mock.mjs` relies on these selectors. Keep them working:
-- text `Job Kanban` (header title), column titles `Applied` etc., `text=Application details` (sheet title)
+- text `Gmail Job Tracker` (header title), column titles `Applied` etc., `text=Application details` (sheet title)
 - `label:has-text("Role") input`, `label:has-text("Status") select` (native select!), `label:has-text("Show ignored")` clickable to toggle
 - `button:has-text("Save")`, `text=Saved`, `button[aria-label="Close"]`, `button:has-text("Mark not job-related")`, `button:has-text("Sync now")`
 - columns must be `div.grid > div` children whose text includes the column title.
@@ -164,7 +164,7 @@ The Playwright smoke test `scripts/e2e-mock.mjs` relies on these selectors. Keep
   running mock server (port 3120) via the provided screenshot script for `board`, `ignored`, and `hover` modes —
   all render correctly (glass columns/cards, status dot colors, pills, sticky glass header, 5-column layout when
   "Show ignored" is on) with `errors: none` from the console-error capture. Did not run `scripts/e2e-mock.mjs`
-  myself (left for the review step per Status above) but all selectors it depends on (`Job Kanban`, column titles,
+  myself (left for the review step per Status above) but all selectors it depends on (`Gmail Job Tracker`, column titles,
   `label:has-text("Show ignored")`, `button:has-text("Sync now")`, `div.grid > div` columns) are preserved as noted.
 - Files touched: `src/components/Board.tsx` (full rewrite, same file), `docs/DESIGN.md` (this Status section + the
   Tailwind-scanner fix above). Did not touch `DetailPanel.tsx`, `page.tsx`, `globals.css`, or anything in `ui/*`.

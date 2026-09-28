@@ -44,3 +44,6 @@ next-env.d.ts
 # app data
 data/
 .env*.local
+
+# demo recording scratch
+/.record-tmp/

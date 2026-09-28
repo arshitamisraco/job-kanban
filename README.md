@@ -49,6 +49,10 @@ For screen recordings, `npm run dev:demo` resets the database on start, shows
      built-in heuristic instead of Claude.
 3. `npm run dev`, open http://localhost:3000, sign in with Google.
 
+## Recording the demo
+
+`scripts/record-demo.mjs` regenerates the portfolio media (five short clips, their poster frames and six stills) from a clean state. For each clip it starts its own `npm run dev:demo` server on port 3210 (fresh database, 13 emails, one more revealed per sync), drives the board with Playwright at 1440x900, injects a fake cursor and hides the Next.js dev indicator, waits until the board is fully painted, then trims and encodes with ffmpeg (H.264, yuv420p, faststart, 30 fps) and writes a first-frame JPEG poster. Stills are captured at 2x and the data-model card is rendered from the SQL block in `PROJECT.md`. Run `node scripts/record-demo.mjs [board sync drag detail ignore stills contract]`; set `FFMPEG` to an ffmpeg build with libx264, and `PORTFOLIO` to the portfolio repo root the files are written into (default `/home/user/my-portfolio`). Headless Chromium does not draw the native drag image, so the drag clip mirrors the dragged card under the pointer.
+
 ## Architecture
 
 ```

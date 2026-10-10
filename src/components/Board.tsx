@@ -44,7 +44,7 @@ function latestEmailTime(app: Application): number {
   return max;
 }
 
-export default function Board({ userEmail }: { userEmail: string }) {
+export default function Board({ userEmail, demo = false }: { userEmail: string; demo?: boolean }) {
   const [applications, setApplications] = useState<Application[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -108,6 +108,7 @@ export default function Board({ userEmail }: { userEmail: string }) {
     // after their internal await, so this is not a synchronous render loop.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadApplications();
+    if (demo) return;
     doSync();
     const interval = setInterval(doSync, SYNC_INTERVAL_MS);
     return () => clearInterval(interval);
@@ -121,6 +122,7 @@ export default function Board({ userEmail }: { userEmail: string }) {
   }, []);
 
   async function handleDrop(id: number, status: Status) {
+    if (demo) return;
     if (!applications) return;
     const prev = applications;
     const current = applications.find((a) => a.id === id);
@@ -187,6 +189,14 @@ export default function Board({ userEmail }: { userEmail: string }) {
           <h1 className="text-lg font-semibold tracking-tight text-ink">Job Kanban</h1>
           <span className="text-sm text-ink-3">{userEmail}</span>
         </div>
+        {demo ? (
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs text-ink-3">Demo data (read-only)</span>
+            <Button size="sm" onClick={() => signIn("google")}>
+              Sign in with Google
+            </Button>
+          </div>
+        ) : (
         <div className="flex flex-wrap items-center gap-3">
           <div className="hidden sm:flex items-center gap-3">
             <Toast message={syncToast} />
@@ -206,6 +216,7 @@ export default function Board({ userEmail }: { userEmail: string }) {
             Sign out
           </Button>
         </div>
+        )}
       </GlassPanel>
 
       <main className="flex flex-1 flex-col overflow-x-auto px-6 py-6">
@@ -289,7 +300,8 @@ export default function Board({ userEmail }: { userEmail: string }) {
                             key={app.id}
                             app={app}
                             dragging={draggingId === app.id}
-                            onClick={() => setSelectedId(app.id)}
+                            draggable={!demo}
+                            onClick={demo ? undefined : () => setSelectedId(app.id)}
                             onDragStart={() => setDraggingId(app.id)}
                             onDragEnd={() => {
                               setDraggingId(null);
@@ -326,20 +338,22 @@ export default function Board({ userEmail }: { userEmail: string }) {
 function Card({
   app,
   dragging,
+  draggable,
   onClick,
   onDragStart,
   onDragEnd,
 }: {
   app: Application;
   dragging: boolean;
-  onClick: () => void;
+  draggable: boolean;
+  onClick?: () => void;
   onDragStart: () => void;
   onDragEnd: () => void;
 }) {
   const latest = latestEmailTime(app);
   return (
     <div
-      draggable
+      draggable={draggable}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClick={onClick}

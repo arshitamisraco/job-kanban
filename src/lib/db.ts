@@ -3,8 +3,14 @@ import path from 'node:path';
 import Database from 'better-sqlite3';
 import type { Application, EmailSummary, Status } from './types';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const DB_PATH = path.join(DATA_DIR, 'app.db');
+// DB_PATH env var overrides the location. On Vercel the deployment bundle is
+// read-only, so fall back to /tmp there (ephemeral: data is lost when the
+// function instance is recycled; the next Gmail sync re-populates it).
+const DEFAULT_DB_PATH = process.env.VERCEL
+  ? '/tmp/job-kanban/app.db'
+  : path.join(process.cwd(), 'data', 'app.db');
+const DB_PATH = process.env.DB_PATH || DEFAULT_DB_PATH;
+const DATA_DIR = path.dirname(DB_PATH);
 
 function createDb(): Database.Database {
   if (!fs.existsSync(DATA_DIR)) {
